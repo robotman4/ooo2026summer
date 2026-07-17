@@ -13,6 +13,7 @@ export default async (req) => {
   }
 
   const submitted = (body.answer || "").trim();
+  const solver = (body.solver || "").trim().slice(0, 60) || "anonymous";
   const expected = process.env.PUZZLE_FLAG; // set in Netlify env vars
 
   if (!expected) {
@@ -46,7 +47,7 @@ export default async (req) => {
           Priority: "default",
           Tags: "tada",
         },
-        body: `Solved at ${solvedAtIso} UTC`,
+        body: `Solved by ${solver} at ${solvedAtIso} UTC`,
       });
     } catch {
       // don't fail the request if the notification fails

@@ -80,6 +80,7 @@
 <p><small>That's the payload. It's not plaintext.</small></p>
 
 <input id="answer" placeholder="FLAG{...}" autocomplete="off" spellcheck="false">
+<input id="solver" placeholder="your name (optional)" autocomplete="off" spellcheck="false" style="margin-top: 8px;">
 <button onclick="submitAnswer()">submit</button>
 <div id="result"></div>
 
@@ -119,6 +120,7 @@
 
   async function submitAnswer() {
     const val = document.getElementById('answer').value;
+    const solver = document.getElementById('solver').value;
     const result = document.getElementById('result');
     result.textContent = 'checking...';
     result.className = '';
@@ -126,7 +128,7 @@
       const res = await fetch('/.netlify/functions/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ answer: val })
+        body: JSON.stringify({ answer: val, solver })
       });
       const data = await res.json();
       if (data.correct && !data.alreadySolvedToday) {
