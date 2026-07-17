@@ -1,8 +1,11 @@
 # OOO Puzzle
 
 ## Puzzle logic
-Ciphertext on the page = `FLAG{VACATION_MODE_ACTIVATED}` XOR'd byte-by-byte with the
-key `n3tl1fy`, base64-encoded. The key is not on the page — it's only in the
+Ciphertext shown on the page = `PUZZLE_FLAG` (from Netlify env vars) XOR'd
+byte-by-byte with the key `n3tl1fy`, base64-encoded. This is computed on each
+request by `netlify/functions/cipher.js` and fetched by the page via JS — it's
+never hardcoded in `index.html`, so it always matches whatever `PUZZLE_FLAG`
+is currently set to. The key is not on the page — it's only in the
 `X-Puzzle-Key` HTTP response header (set in `netlify.toml`), so solving requires
 either `curl -I` on the page or checking the Network tab in devtools.
 
@@ -10,21 +13,15 @@ Solve path a technical person needs to find:
 1. View source / console → hint tells them to check response headers.
 2. `curl -I https://yoursite.netlify.app/` → finds `X-Puzzle-Key: n3tl1fy`.
 3. Base64-decode the ciphertext, XOR with the key → recovers the flag.
-4. Submit `FLAG{VACATION_MODE_ACTIVATED}`.
+4. Submit the recovered flag.
 
-To change the flag/key, regenerate the ciphertext:
+To change the flag, just update the `PUZZLE_FLAG` env var in Netlify — the
+displayed ciphertext updates automatically on the next request, no redeploy
+needed.
 
-```python
-import base64
-flag = "FLAG{YOUR_NEW_FLAG}"
-key = "your-new-key"
-xored = bytes([ord(c) ^ ord(key[i % len(key)]) for i, c in enumerate(flag)])
-print(base64.b64encode(xored).decode())
-```
-Then update:
-- `.cipher` div content in `index.html`
+To change the key, update it in both places (they must match):
+- `key` constant in `netlify/functions/cipher.js`
 - `X-Puzzle-Key` value in `netlify.toml`
-- `PUZZLE_FLAG` env var in Netlify (see below)
 
 ## Deploy
 

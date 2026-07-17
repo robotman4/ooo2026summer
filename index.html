@@ -75,7 +75,7 @@
 <p><span class="prompt">$</span> this page is not what it looks like.</p>
 <p>Somewhere in here is a flag. Format: <code>FLAG{...}</code></p>
 
-<div class="cipher">KH81K0owOC1yICV+KCYjfDApbic6OnoiLWUjPRM=</div>
+<div class="cipher" id="cipher">loading...</div>
 
 <p><small>That's the payload. It's not plaintext.</small></p>
 
@@ -88,6 +88,17 @@
 <script>
   console.log("%cyou're in the console. good start.", "color:#3fb950;font-family:monospace;");
   console.log(atob("Q2hlY2sgdGhlIHJlc3BvbnNlIGhlYWRlcnMuIGN1cmwgLUkgdGhpcyBwYWdlLg=="));
+
+  async function loadCipher() {
+    const el = document.getElementById('cipher');
+    try {
+      const res = await fetch('/.netlify/functions/cipher');
+      const data = await res.json();
+      el.textContent = data.cipher || 'error loading payload';
+    } catch (e) {
+      el.textContent = 'error loading payload';
+    }
+  }
 
   async function loadStatus() {
     const badge = document.getElementById('status-badge');
@@ -135,6 +146,7 @@
     }
   }
 
+  loadCipher();
   loadStatus();
 </script>
 
