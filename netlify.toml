@@ -5,9 +5,9 @@
 [[headers]]
   for = "/"
   [headers.values]
-    X-Puzzle-Key = "n3tl1fy"
+    X-Puzzle-Key = "1amth3key-y0u-luckyb4st4rd"
 
 [[headers]]
   for = "/index.html"
   [headers.values]
-    X-Puzzle-Key = "n3tl1fy"
+    X-Puzzle-Key = "1amth3key-y0u-luckyb4st4rd"

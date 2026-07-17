@@ -1,6 +1,6 @@
 export default async () => {
   const flag = process.env.PUZZLE_FLAG;
-  const key = "n3tl1fy"; // must match X-Puzzle-Key in netlify.toml
+  const key = "1amth3key-y0u-luckyb4st4rd"; // must match X-Puzzle-Key in netlify.toml
 
   if (!flag) {
     return Response.json({ error: "server not configured" }, { status: 500 });

@@ -2,7 +2,7 @@
 
 ## Puzzle logic
 Ciphertext shown on the page = `PUZZLE_FLAG` (from Netlify env vars) XOR'd
-byte-by-byte with the key `n3tl1fy`, base64-encoded. This is computed on each
+byte-by-byte with the key `1amth3key-y0u-luckyb4st4rd`, base64-encoded. This is computed on each
 request by `netlify/functions/cipher.js` and fetched by the page via JS — it's
 never hardcoded in `index.html`, so it always matches whatever `PUZZLE_FLAG`
 is currently set to. The key is not on the page — it's only in the
@@ -11,7 +11,7 @@ either `curl -I` on the page or checking the Network tab in devtools.
 
 Solve path a technical person needs to find:
 1. View source / console → hint tells them to check response headers.
-2. `curl -I https://yoursite.netlify.app/` → finds `X-Puzzle-Key: n3tl1fy`.
+2. `curl -I https://yoursite.netlify.app/` → finds `X-Puzzle-Key: 1amth3key-y0u-luckyb4st4rd`.
 3. Base64-decode the ciphertext, XOR with the key → recovers the flag.
 4. Submit the recovered flag.
 
