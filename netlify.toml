@@ -1,0 +1,13 @@
+[build]
+  functions = "netlify/functions"
+  publish = "."
+
+[[headers]]
+  for = "/"
+  [headers.values]
+    X-Puzzle-Key = "n3tl1fy"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    X-Puzzle-Key = "n3tl1fy"

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 - Currently Unavailable</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    background: #0d1117;
+    color: #c9d1d9;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    max-width: 720px;
+    margin: 60px auto;
+    padding: 0 20px;
+    line-height: 1.6;
+  }
+  h1 { color: #58a6ff; font-size: 1.4em; }
+  .prompt { color: #3fb950; }
+  .cipher {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    padding: 16px;
+    word-break: break-all;
+    margin: 16px 0;
+    color: #f0883e;
+  }
+  input {
+    background: #0d1117;
+    border: 1px solid #30363d;
+    color: #c9d1d9;
+    padding: 8px 10px;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 6px;
+  }
+  button {
+    margin-top: 10px;
+    background: #238636;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  button:hover { background: #2ea043; }
+  #result { margin-top: 14px; min-height: 20px; }
+  .ok { color: #3fb950; }
+  .bad { color: #f85149; }
+  #status-badge {
+    display: inline-block;
+    font-size: 0.8em;
+    padding: 3px 8px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+  }
+  .badge-solved { background: #2ea04333; color: #3fb950; border: 1px solid #3fb950; }
+  .badge-open { background: #f8514933; color: #f85149; border: 1px solid #f85149; }
+  small { color: #6e7681; }
+</style>
+</head>
+<body>
+
+<!--
+  you found the source. that's step 0.
+  the rest doesn't live here.
+-->
+
+<div id="status-badge">checking status...</div>
+
+<h1>&gt; access_denied</h1>
+<p><span class="prompt">$</span> this page is not what it looks like.</p>
+<p>Somewhere in here is a flag. Format: <code>FLAG{...}</code></p>
+
+<div class="cipher">KH81K0owOC1yICV+KCYjfDApbic6OnoiLWUjPRM=</div>
+
+<p><small>That's the payload. It's not plaintext.</small></p>
+
+<input id="answer" placeholder="FLAG{...}" autocomplete="off" spellcheck="false">
+<button onclick="submitAnswer()">submit</button>
+<div id="result"></div>
+
+<p><small>One valid solve per day triggers a notification. After that, submissions still get checked but nothing fires.</small></p>
+
+<script>
+  console.log("%cyou're in the console. good start.", "color:#3fb950;font-family:monospace;");
+  console.log(atob("Q2hlY2sgdGhlIHJlc3BvbnNlIGhlYWRlcnMuIGN1cmwgLUkgdGhpcyBwYWdlLg=="));
+
+  async function loadStatus() {
+    const badge = document.getElementById('status-badge');
+    try {
+      const res = await fetch('/.netlify/functions/status');
+      const data = await res.json();
+      if (data.solvedToday) {
+        badge.textContent = 'solved today at ' + data.solvedAt;
+        badge.className = 'badge-solved';
+      } else {
+        badge.textContent = 'unsolved today';
+        badge.className = 'badge-open';
+      }
+    } catch (e) {
+      badge.textContent = 'status unknown';
+    }
+  }
+
+  async function submitAnswer() {
+    const val = document.getElementById('answer').value;
+    const result = document.getElementById('result');
+    result.textContent = 'checking...';
+    result.className = '';
+    try {
+      const res = await fetch('/.netlify/functions/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ answer: val })
+      });
+      const data = await res.json();
+      if (data.correct && !data.alreadySolvedToday) {
+        result.textContent = 'correct. you are the first today. notification sent.';
+        result.className = 'ok';
+      } else if (data.correct && data.alreadySolvedToday) {
+        result.textContent = 'correct, but someone already solved it today. no notification sent.';
+        result.className = 'ok';
+      } else {
+        result.textContent = 'wrong.';
+        result.className = 'bad';
+      }
+      loadStatus();
+    } catch (e) {
+      result.textContent = 'error contacting server.';
+      result.className = 'bad';
+    }
+  }
+
+  loadStatus();
+</script>
+
+</body>
+</html>
