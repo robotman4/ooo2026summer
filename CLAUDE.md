@@ -42,3 +42,51 @@ notifies the owner (once/day) via ntfy.
 - Solver name (optional input on the page) is passed through to the ntfy
   notification body only, never a header, to avoid header-injection from
   arbitrary user input.
+
+## Ideas for future clue-hiding mechanisms
+Not implemented — notes to pick from later when reworking the clues. Each is
+independent; mix and match.
+
+- **UA-gated header** (discussed, deferred): only send `X-Puzzle-Key` when
+  `User-Agent` matches `curl/...`, via a Netlify Edge Function wrapping `/`
+  and `/index.html` (`context.next()` then set/strip the header based on
+  UA). Static `netlify.toml` `[[headers]]` can't do this — it's unconditional.
+  Weak against UA spoofing, but hides the key from casual DevTools snooping.
+- **HTTP trailer / rarely-checked header**: instead of a common header name,
+  use something a solver wouldn't think to look at by default, e.g. `Server-Timing`
+  (visible in DevTools but easy to overlook) or a custom low-traffic header
+  combined with a hint that says "check *all* the headers," not just one.
+- **Cookie-based clue**: set a `Set-Cookie` on first visit containing an
+  encoded hint; requires solver to inspect Application/Storage tab or
+  `document.cookie` instead of Network tab. Good for diversifying which dev
+  tool panel they need to open.
+- **robots.txt / well-known paths**: drop a hint or partial key fragment in
+  `/robots.txt`, `/.well-known/security.txt`, or a 404 page for a specific
+  bogus path — rewards solvers who probe common conventions.
+- **DNS TXT record**: put a clue or key fragment in a TXT record on a
+  subdomain (e.g. `clue.<site>.netlify.app` or on the real domain if one
+  exists). Requires `dig`/`nslookup`, a different tool than curl/browser.
+- **Timing/order-dependent clue**: e.g. the key only appears in the response
+  on the *second* request in a session (via a Blobs-backed per-IP or
+  per-cookie counter), forcing solvers to notice something changes on
+  reload — teaches "don't trust the first response."
+- **Split the key across two channels**: half in a header, half in a
+  `console.log` hint (already have a console breadcrumb pattern in
+  `index.html`) or in a response header on a *different* route (e.g.
+  `/.netlify/functions/status`). Forces combining two discovery methods
+  instead of one lucky guess.
+- **Post-solve unlock**: once solved, `verify.js` could return an extra field
+  (e.g. a second, harder cipher or a follow-up hint) only on the *first*
+  correct solve of the day — rewards being first, gives repeat solvers a new
+  puzzle instead of just "already solved."
+- **Steganography-lite**: hide a fragment in `index.html` via CSS (e.g.
+  content in a `::before`/`::after` pseudo-element only visible via
+  "inspect element", not view-source) or in an SVG favicon's metadata.
+- **Time-boxed key**: rotate the key automatically based on UTC day/hour
+  (e.g. `key + today's date`) so `curl -I` from a stale cached page/screenshot
+  doesn't work — pairs well with the existing once-per-day solve limit.
+
+When picking one, keep the asymmetry in mind: the *hint text* on the page
+should always give a fair, findable trail to whichever mechanism is live —
+don't stack multiple obscure mechanisms without updating the hints, or it
+becomes unsolvable rather than hard.
